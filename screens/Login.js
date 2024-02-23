@@ -1,10 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import { Input, Button } from 'react-native-elements' 
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { authentication } from '../firebase/firebaseConfig';
 
 export default function Login({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const loginUser = async () => {
+      signInWithEmailAndPassword(authentication, email, password)
+      .then((credentials) => {
+        console.log("utilisateur connecté", credentials.user);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+    }
   return (
     <View style={styles.container}>
         <Input 
@@ -24,7 +36,7 @@ export default function Login({ navigation }) {
         />
 
         <Button
-      
+        onPress={ loginUser }
         title='Login'
         />
         <Button
