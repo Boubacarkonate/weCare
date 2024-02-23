@@ -2,9 +2,11 @@ import { StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import { Input, Button } from 'react-native-elements' 
 
-export default function Login({ navigation }) {
+export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [Username, setUsername] = useState('');
+    const [avatar, setAvatar] = useState('');
   return (
     <View style={styles.container}>
         <Input 
@@ -22,14 +24,26 @@ export default function Login({ navigation }) {
         leftIcon={{type: 'material', name: 'lock'}}
         secureTextEntry
         />
-
-        <Button
-      
-        title='Login'
+        <Input 
+        placeholder='Username'
+        label='Username'
+        value={ Username }
+        onChangeText={ text => setUsername(text) }
+        leftIcon={{type: 'material', name: 'account-circle'}}
+        secureTextEntry
         />
+        <Input 
+        placeholder='Avatar'
+        label='Avatar'
+        value={ avatar }
+        onChangeText={ text => setAvatar(text) }
+        leftIcon={{type: 'material', name: 'photo'}}
+        secureTextEntry
+        />
+
+       
         <Button
         style={styles.btn}
-        onPress={() => navigation.navigate("Register")}
         title='Register'
         />
     </View>
@@ -39,9 +53,9 @@ export default function Login({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // backgroundColor: '#fff',
-        // alignItems: 'center',
-        // justifyContent: 'center',
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
       },
     btn: {
         marginTop: 10
