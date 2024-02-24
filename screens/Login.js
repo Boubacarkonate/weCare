@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input, Button } from 'react-native-elements' 
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { authentication } from '../firebase/firebaseConfig';
 
 export default function Login({ navigation }) {
@@ -17,6 +17,16 @@ export default function Login({ navigation }) {
         console.log(err.message);
       });
     }
+    useEffect(() => {
+      onAuthStateChanged(authentication, (user) => {
+        if (user) {
+          navigation.navigate('Home');
+        } else {
+          console.log('no user');
+        }
+      });
+    },[]);
+
   return (
     <View style={styles.container}>
         <Input 
