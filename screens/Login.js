@@ -23,7 +23,7 @@ export default function Login({ navigation }) {
         if (user) {
           navigation.navigate('Home');
         } else {
-          console.log('no user');
+          console.log('utilisateur déconnecté');
         }
       });
     },[]);

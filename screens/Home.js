@@ -1,18 +1,26 @@
-import { View, Text, StyleSheet, FlatList, Image, TouchableWithoutFeedback, Platform } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, TouchableWithoutFeedback, Platform, Button } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { authentication, db } from '../firebase/firebaseConfig'
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+// import { Button } from 'react-native-elements';
 
 export default function Home({navigation}) {
     const [users, setUsers] = useState([]);
+    
+    const logoutUser = async () => {
+        authentication.signOut()
+            .then(() => {
+                navigation.replace('Login')
+            });
+    }
 
     useEffect(() => {
         const unsubscribe = getUsers();
         return () => unsubscribe(); // Nettoyage de l'écouteur
     }, []);
 
-    const getUsers = async () => {
+    const getUsers = () => {
         const docGetUserRef = collection(db, 'utilisateurs');
         const q = query(docGetUserRef, where('userUID', '!=', authentication?.currentUser?.uid));
         return onSnapshot(q, (onSnap) => {
@@ -26,12 +34,13 @@ export default function Home({navigation}) {
     }
 
     return (
+        <>
         <FlatList 
         data={users}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
             <TouchableWithoutFeedback 
-            onPress={() => navigation.navigate('Chat')}
+            onPress={() => navigation.navigate('Chat', { name: item.username , uid: item.userUID})}
             style={{backgroundColor: '#333'}}
             // onPress={onPress}
             >
@@ -47,6 +56,11 @@ export default function Home({navigation}) {
             </TouchableWithoutFeedback>
         )}
     />
+    <Button
+    title='Logout'
+    onPress={logoutUser}
+    />
+    </>
    
     );
 }
