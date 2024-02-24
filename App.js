@@ -5,6 +5,7 @@ import Register from './screens/Register';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './screens/Home';
+import Chat from './screens/Chat';
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -22,6 +23,11 @@ export default function App() {
           <Stack.Screen
           name='Home'
           component={ Home }
+          options={{headerBackVisible: false, title: 'Active users', headerTitleAlign: 'center', headerTitleStyle: { fontWeight: 900 }}}
+          />
+           <Stack.Screen
+          name='Chat'
+          component={ Chat }
           />
       </Stack.Navigator>
     </NavigationContainer>
