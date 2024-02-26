@@ -55,6 +55,7 @@ export default function Home({ navigation }) {
               navigation.navigate("Chat", {
                 name: item.username,
                 uid: item.userUID,
+                avatar: item.avatarUrl
               })
             }
             style={{ backgroundColor: "#333" }}

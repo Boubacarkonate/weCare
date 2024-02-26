@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { Input, Button } from 'react-native-elements';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { authentication, db } from '../../firebase/firebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function Register() {
@@ -12,6 +13,8 @@ export default function Register() {
     const [username, setUsername] = useState('');
     const [avatar, setAvatar] = useState('');
     const [avatarPreview, setAvatarPreview] = useState(null); // State pour stocker l'aperçu de l'avatar
+
+    const navigation = useNavigation();
 
     const registerUser = async () => {
         try {
@@ -24,8 +27,12 @@ export default function Register() {
                 email,
                 password,
                 userUID,
+                createdAt: serverTimestamp()
             });
             console.log("Vous êtes inscrit :", credentials);
+            Alert.alert('Success', 'Profile supprimé');
+            // Rediriger automatiquement vers la page d'accueil après la suppression
+            navigation.navigate('Home');
         } catch (err) {
             console.log(err.message);
         }
