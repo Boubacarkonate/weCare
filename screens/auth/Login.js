@@ -55,6 +55,11 @@ export default function Login({ navigation }) {
         onPress={() => navigation.navigate("Register")}
         title='Register'
         />
+          <Button
+        style={{marginTop: 50}}
+        onPress={() => navigation.navigate("ForgotPassword")}
+        title='Password forgotten'
+        />
     </View>
   )
 }

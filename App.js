@@ -10,6 +10,7 @@ import Profile from "./screens/profile/Profile";
 import DeleteProfile from "./screens/profile/DeleteProfile";
 import UpdateProfile from "./screens/profile/UpdateProfile";
 import { Ionicons } from '@expo/vector-icons';
+import ForgotPassword from "./screens/auth/ForgotPassword";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen
           name="Home"
           component={Home}
