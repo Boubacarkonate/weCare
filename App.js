@@ -11,6 +11,9 @@ import DeleteProfile from "./screens/profile/DeleteProfile";
 import UpdateProfile from "./screens/profile/UpdateProfile";
 import { Ionicons } from '@expo/vector-icons';
 import ForgotPassword from "./screens/auth/ForgotPassword";
+import AudioCall from "./screens/AudioCall";
+import VideoCall from "./screens/VideoCall";
+
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -61,6 +64,8 @@ export default function App() {
             headerTitleStyle: { fontWeight: "bold" },
           })}
         />
+        <Stack.Screen name="AudioCall" component={AudioCall} />
+        <Stack.Screen name="VideoCall" component={VideoCall} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
         <Stack.Screen name="DeleteProfile" component={DeleteProfile} />

@@ -30,7 +30,7 @@ export default function Register() {
                 createdAt: serverTimestamp()
             });
             console.log("Vous êtes inscrit :", credentials);
-            Alert.alert('Success', 'Profile supprimé');
+            Alert.alert('Success', 'Incsrit supprimé');
             // Rediriger automatiquement vers la page d'accueil après la suppression
             navigation.navigate('Home');
         } catch (err) {
