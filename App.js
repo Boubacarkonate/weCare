@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ForgotPassword from "./screens/auth/ForgotPassword";
 import AudioCall from "./screens/AudioCall";
 import VideoCall from "./screens/VideoCall";
+import TakeVideo_Photo_Gallery from "./screens/media/TakeVideo_Photo_Gallery";
 
 
 
@@ -27,18 +28,18 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{
-            headerBackVisible: false,
-            title: "Active users",
-            headerTitleAlign: "center",
-            headerTitleStyle: { fontWeight: 900 },
-            headerRight: () => (
-              <TouchableOpacity onPress={() => alert('This is a button!')} style={styles.headerRightBtn}>
-                <Ionicons name="search" size={30} color="black" style={{ paddingRight:20 }} />
-                <Ionicons name="ellipsis-vertical" size={30} color="black"/>
-              </TouchableOpacity>
-            ),
-          }}
+          // options={{
+          //   headerBackVisible: false,
+          //   title: "Active users",
+          //   headerTitleAlign: "center",
+          //   headerTitleStyle: { fontWeight: 900 },
+          //   headerRight: () => (
+          //     <TouchableOpacity onPress={() => alert('This is a button!')} style={styles.headerRightBtn}>
+          //       <Ionicons name="search" size={30} color="black" style={{ paddingRight:20 }} />
+          //       <Ionicons name="ellipsis-vertical" size={30} color="black"/>
+          //     </TouchableOpacity>
+          //   ),
+          // }}
         />
         <Stack.Screen
           name="Chat"
@@ -65,6 +66,7 @@ export default function App() {
             headerTitleStyle: { fontWeight: "bold" },
           })}
         />
+        <Stack.Screen name="TakeVideo_Photo_Gallery" component={TakeVideo_Photo_Gallery} />
         <Stack.Screen name="AudioCall" component={AudioCall} />
         <Stack.Screen name="VideoCall" component={VideoCall} />
         <Stack.Screen name="Profile" component={Profile} />
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center"
   },
   headerRightBtn: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect } from "react";
-import { StyleSheet, TouchableOpacity, Image, View, Text, Modal, Pressable } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, View, Text, Modal, Pressable, TextInput , Alert} from "react-native";
 import { Bubble, GiftedChat, InputToolbar, Send } from "react-native-gifted-chat";
 import { authentication, db, storage } from "../firebase/firebaseConfig";
 import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, deleteDoc } from "firebase/firestore";
@@ -9,7 +9,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import ImagePreview from "./media/ImagePreview";
+import TakeVideo_Photo_Gallery from "./media/TakeVideo_Photo_Gallery";
 import Lightbox from 'react-native-lightbox';
 
 export default function Chat({ route }) {
@@ -178,6 +178,38 @@ export default function Chat({ route }) {
         setModalVisible(false);
     };
 
+    const CustomAccessory = ({ onSend }) => {
+        const [text, setText] = useState('');
+        const [caption, setCaption] = useState('');;
+    
+        const handleSend = () => {
+            const message = {
+                text: caption, // Utiliser la légende comme texte du message
+                image: text, // Utiliser l'URI de l'image comme image du message
+            };
+            onSend([message]); // Envoyer le message
+            setText(''); // Réinitialiser l'URI de l'image après l'envoi
+            setCaption(''); // Réinitialiser la légende après l'envoi
+    };
+    
+        return (
+            <View style={styles.containerCustomAccessory}>
+                <TextInput
+                    style={styles.inputCustomeAccessory}
+                    value={caption}
+                    onChangeText={setCaption}
+                    placeholder="Ajouter une légende..."
+                    multiline={true}
+                    numberOfLines={3}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                    <Text style={styles.sendButtonText}>Envoyer</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }; 
+
+
     const imagePreview = () => {
       if (image) {
           return (
@@ -186,9 +218,10 @@ export default function Chat({ route }) {
                   <Entypo name="circle-with-cross" size={24} color="black" />
                   </TouchableOpacity>
                   <Image source={{ uri: image }} style={styles.imagePreview} />
-                  <TouchableOpacity onPress={onSendConfirmation}>
+                  {/* <TouchableOpacity onPress={onSendConfirmation}>
                       <Text>Envoyer</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
+                
               </View>
           );
       } else {
@@ -197,31 +230,24 @@ export default function Chat({ route }) {
   };
   
 
-  const onSendConfirmation = async () => {
-    try {
-        if (image) {
-            const downloadURL = await uploadImage(image); // Attendre le téléchargement de l'image
-            onSend([{ image: downloadURL }]); // Envoyer le message avec l'URL de l'image téléchargée
-            setImage(null); // Réinitialiser l'état de l'image après l'avoir envoyée
-        }
-    } catch (error) {
-        console.error("Erreur lors de l'envoi du message :", error);
-    }
-}
-
-
-
     const itemButton = (props) => {
       return (
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'center'}} >
+              <Pressable  onPress={() => navigation.navigate("TakeVideo_Photo_Gallery")}>
+             <FontAwesome
+              name="camera"
+              size={22}
+              color="#333"
+            />
+          </Pressable>
              <Pressable onPress={optionFile}>
              <FontAwesome
               name="paperclip"
               size={22}
               color="#333"
-              // style={{
-              //   transform: [{ rotateY: "180deg" }],
-              // }}
+              style={{
+                transform: [{ rotateY: "180deg" }],
+              }}
             />
           </Pressable>
           <Send {...props}>
@@ -231,10 +257,6 @@ export default function Chat({ route }) {
               color="#333"
               />
           </Send>
-        
-          {/* <TouchableOpacity>
-          <FontAwesome name="paperclip" size={22} style={{ transform: [{ rotateY: "180deg" }]}}/>
-          </TouchableOpacity> */}
 
       <Modal visible={modalVisible} animationType="fade" transparent={true}>
      {/* Utiliser TouchableOpacity pour détecter les touchers en dehors du contenu du modal */}
@@ -295,6 +317,7 @@ export default function Chat({ route }) {
       return <FontAwesome name="angle-double-down" size={22} color="#333" />;
     };
 
+  
     return (
             <GiftedChat
                 messages={messages}
@@ -335,6 +358,7 @@ export default function Chat({ route }) {
                     return null;
                 }}
                 renderChatFooter={imagePreview}
+                renderAccessory={image ? ({ onSend }) => <CustomAccessory onSend={onSend} /> : null}
                 renderInputToolbar={props => {
                     return (
                         <InputToolbar {...props}
@@ -372,5 +396,60 @@ const styles = StyleSheet.create({
     headerRightBtn: {
         flexDirection: "row",
     },
+
+    modalContainer: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        height: "70%",
+        backgroundColor: "red",
+        // opacity: 1,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row",
+        alignContent: "center",
+      },
+      closeText: {
+        fontSize: 16,
+        marginBottom: 10,
+        color: "#007BFF",
+      },
+      optionText: {
+        fontSize: 15,
+        marginBottom: 10,
+      },
+      btnOptions: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      iconBackground: {
+        backgroundColor: "#007BFF",
+        borderRadius: 50,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginHorizontal: 20,
+      },
+
+      containerCustomAccessory:{
+        flex: 1,
+        alignItems: "center",
+        position: 'absolute',
+        bottom: 10,
+        backgroundColor: "blue",
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      inputCustomeAccessory:{
+        backgroundColor: "pink"
+      },
+      sendButtonText:{
+        backgroundColor: "yellow",
+      }
 });
 
