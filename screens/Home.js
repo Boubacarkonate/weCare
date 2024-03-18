@@ -76,6 +76,7 @@ export default function Home({ navigation }) {
           </TouchableWithoutFeedback>
         )}
       />
+      <Button title="Album" onPress={() => navigation.navigate("Album")} />
       <Button title="Profile" onPress={() => navigation.navigate("Profile")} />
       <Button title="Logout" onPress={logoutUser} />
     </>

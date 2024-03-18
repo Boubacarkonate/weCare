@@ -9,7 +9,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import TakeVideo_Photo_Gallery from "./media/TakeVideo_Photo_Gallery";
+import * as DocumentPicker from 'expo-document-picker';
+
+
 import Lightbox from 'react-native-lightbox';
 
 export default function Chat({ route }) {
@@ -17,6 +19,8 @@ export default function Chat({ route }) {
     const currentUser = authentication?.currentUser?.uid;
     const [messages, setMessages] = useState([]);
     const [image, setImage] = useState(null);
+    const [documentFile, setDocumentFile] = useState(null);
+    const [selectedDocumentName, setSelectedDocumentName] = useState(""); // État pour stocker le nom du document sélectionné
     const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
 
@@ -60,7 +64,8 @@ export default function Chat({ route }) {
                 _id: mes.id,
                 createdAt: mes.data().createdAt.toDate(),
                 image: mes.data().image,
-                avatar: mes.data().avatarUrl
+                documentFile: mes.data().documentFile,
+                // avatar: mes.data().avatarUrl
             }));
             setMessages(allMessages);
         });
@@ -68,30 +73,42 @@ export default function Chat({ route }) {
 
     const onSend = useCallback(
         async (messagesArray) => {
-          console.log("Messages à envoyer :", messagesArray); // Vérifiez les messages à envoyer
             const msg = messagesArray[0];
             const chatId = uid > currentUser ? `${uid + "-" + currentUser}` : `${currentUser + "-" + uid}`;
             const documentRef = doc(db, "chatRooms", chatId);
             const collectionRef = collection(documentRef, "messages");
-
+    
+            // Vérifiez si le message contient une image
             if (image) {
                 await uploadImage();
                 msg.image = image;
                 setImage(null);
             }
-
+    
+            // Vérifiez si le message contient un document
+            if (documentFile) {
+                // Téléchargez le document vers Firebase Storage
+                const downloadURL = await uploadDocumentFile(documentFile.uri, documentFile.name);
+                // Ajoutez l'URL de téléchargement du document au message
+                msg.documentFile = downloadURL;
+                setDocumentFile(null); // Réinitialisez la variable du document sélectionné
+                setSelectedDocumentName(""); // Réinitialisez le nom du document sélectionné
+            }
+    
             const chatSnap = await addDoc(collectionRef, {
                 ...msg,
                 sentBy: currentUser,
                 sentTo: uid,
                 createdAt: serverTimestamp(),
+                image: msg.image || null,
+                documentFile: msg.documentFile || null,
             });
-
+    
             setMessages((previousMessages) =>
                 GiftedChat.append(previousMessages, messagesArray)
             );
         },
-        [image]
+        [image, documentFile]
     );
 
     const pickImage = async () => {
@@ -125,36 +142,120 @@ export default function Chat({ route }) {
         }
     };
 
-    const onDeleteMessage = async (messageToDelete) => {
+    const pickDocumentFile = async () => {
+        console.log('1: ouverture de la sélection');
         try {
-            const chatId = uid > currentUser ? `${uid + "-" + currentUser}` : `${currentUser + "-" + uid}`;
-            const documentRef = doc(db, "chatRooms", chatId);
-            const collectionRef = collection(documentRef, "messages");
+            const result = await DocumentPicker.getDocumentAsync();
+            
+            if (!result.cancelled) {
+                console.log('2: sélection ok', result);
+                const selectedFile = result.assets[0];
+                console.log(selectedFile.uri); // URI du fichier sélectionné
+                console.log(selectedFile.name); // Nom du fichier
+                console.log(selectedFile.size); // Taille du fichier
 
-            if (messageToDelete.image) {
-                await deleteImgToStorage(messageToDelete.image);
+                // Mettre à jour le nom du document sélectionné dans l'état local
+                setSelectedDocumentName(selectedFile.name);
+
+                // Mettre à jour l'état local du document sélectionné
+                setDocumentFile(selectedFile);
+
+            } else {
+                // L'utilisateur a annulé la sélection du document
+                console.log('Sélection de document annulée');
+                return null;
             }
             
-        confirm("confirmer la suppression");
-        Alert.alert("confirmer la suppression", [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          { text: "OK", onPress: () => console.log("OK Pressed") },
-        ]);
-
-            await deleteDoc(doc(collectionRef, messageToDelete._id));
-            setMessages((previousMessages) =>
-                previousMessages.filter(
-                    (message) => message._id !== messageToDelete._id
-                )
-            );
         } catch (error) {
-            console.error("Erreur lors de la suppression du message:", error);
+            // Une erreur s'est produite lors de la sélection du document
+            console.error('Erreur lors de la sélection du document :', error);
+            throw error;
         }
     };
+    
+    
+    
+    const uploadDocumentFile = async (documentUri, fileName) => {
+        try {
+            const filename = fileName || documentUri.substring(documentUri.lastIndexOf("/") + 1);
+            const storageRef = ref(storage, `documents/${filename}`);
+            const response = await fetch(documentUri);
+            const blob = await response.blob();
+            const uploadTask = await uploadBytes(storageRef, blob);
+            const downloadURL = await getDownloadURL(uploadTask.ref);
+            console.log("Document téléchargé avec succès vers Firebase Storage", downloadURL);
+            return downloadURL;
+        } catch (error) {
+            console.error("Erreur lors du téléchargement du document vers Firebase Storage :", error);
+            throw error;
+        }
+    };
+
+ 
+const renderViewDocument = () => {
+    if (selectedDocumentName) {
+        return ( 
+        <View style={styles.documentPreviewContainer}>
+            <Text>Nom du document sélectionné : {selectedDocumentName}</Text>  
+            </View>
+);
+      
+    } else {
+        return null;
+    }
+};
+
+
+
+    
+
+const onDeleteMessage = async (messageToDelete) => {
+    try {
+        const chatId = uid > currentUser ? `${uid + "-" + currentUser}` : `${currentUser + "-" + uid}`;
+        const documentRef = doc(db, "chatRooms", chatId);
+        const collectionRef = collection(documentRef, "messages");
+
+        // Supprimer l'image associée si elle existe
+        if (messageToDelete.image) {
+            await deleteImgToStorage(messageToDelete.image);
+        }
+
+        // Supprimer le document associé si existe
+        if (messageToDelete.documentFile) {
+            await deleteDocumentToStorage(messageToDelete.documentFile);
+        }
+
+        // Confirmer la suppression avec une boîte de dialogue
+        confirm('confirmer la suppression');
+        Alert.alert(
+            "Confirmation",
+            "Êtes-vous sûr de vouloir supprimer ce message ?",
+            [
+                {
+                    text: "Annuler",
+                    onPress: () => console.log("Suppression annulée"),
+                    style: "cancel",
+                },
+                {
+                    text: "Supprimer",
+                    onPress: async () => {
+                        // Supprimer le message de la collection Firestore
+                        await deleteDoc(doc(collectionRef, messageToDelete._id));
+                        // Mettre à jour l'état des messages en filtrant le message supprimé
+                        setMessages((previousMessages) =>
+                            previousMessages.filter(
+                                (message) => message._id !== messageToDelete._id
+                            )
+                        );
+                    },
+                },
+            ]
+        );
+    } catch (error) {
+        console.error("Erreur lors de la suppression du message:", error);
+    }
+};
+
 
     const deleteImgToStorage = async (imageUrl) => {
         try {
@@ -164,6 +265,18 @@ export default function Chat({ route }) {
             console.log("Image supprimée avec succès de Firebase Storage");
         } catch (error) {
             console.error("Erreur lors de la suppression de l'image de Firebase Storage :", error);
+            throw error;
+        }
+    };
+
+    const deleteDocumentToStorage = async (document) => {
+        try {
+            const filename = document.substring(document.lastIndexOf("/") + 1);
+            const storageRef = ref(storage, `documents/${filename}`);
+            await deleteObject(storageRef);
+            console.log("document supprimé avec succès de Firebase Storage");
+        } catch (error) {
+            console.error("Erreur lors de la suppression du document de Firebase Storage :", error);
             throw error;
         }
     };
@@ -210,6 +323,8 @@ export default function Chat({ route }) {
     }; 
 
 
+
+
     const imagePreview = () => {
       if (image) {
           return (
@@ -218,10 +333,6 @@ export default function Chat({ route }) {
                   <Entypo name="circle-with-cross" size={24} color="black" />
                   </TouchableOpacity>
                   <Image source={{ uri: image }} style={styles.imagePreview} />
-                  {/* <TouchableOpacity onPress={onSendConfirmation}>
-                      <Text>Envoyer</Text>
-                  </TouchableOpacity> */}
-                
               </View>
           );
       } else {
@@ -269,11 +380,11 @@ export default function Chat({ route }) {
         {/* Envelopper le contenu du modal dans une View pour empêcher la fermeture lors du toucher à l'intérieur */}
         <View style={styles.modalContainer}>
           {/* Vos boutons et contenu ici */}
-          <TouchableOpacity style={styles.btnOptions}>
+          <TouchableOpacity style={styles.btnOptions} onPress={pickDocumentFile}>
             <Ionicons name="document" size={35} color="black" />
             <Text style={styles.optionText}>Document</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOptions}>
+          <TouchableOpacity style={styles.btnOptions} onPress={() => navigation.navigate("TakeVideo_Photo_Gallery")}>
             <MaterialIcons name="photo-camera" size={35} color="black" />
             <Text style={styles.optionText}>Caméra</Text>            
           </TouchableOpacity>
@@ -288,6 +399,7 @@ export default function Chat({ route }) {
         </View>
       );
     }
+    
 
     const renderBubble = (props) => {
       return (
@@ -312,6 +424,8 @@ export default function Chat({ route }) {
         />
     );
     };
+
+    
 
     const scrollToBottomComponent = () => {
       return <FontAwesome name="angle-double-down" size={22} color="#333" />;
@@ -346,19 +460,35 @@ export default function Chat({ route }) {
                             <TouchableOpacity
                                 onLongPress={() => onDeleteMessage(props.currentMessage)}
                             >
-                                {/* <Lightbox> */}
-                                    <Image
-                                        source={{ uri: props.currentMessage.image }}
-                                        style={{ width: 100, height: 100 }}
-                                    />
-                                {/* </Lightbox> */}
+                                <Image
+                                    source={{ uri: props.currentMessage.image }}
+                                    style={{ width: 100, height: 100 }}
+                                />
+                            </TouchableOpacity>
+                        );
+                    } else if (props.currentMessage.documentFile) {
+                        // Extraire le nom du fichier du lien du document
+                        const fileName = props.currentMessage.documentFile.split('/').pop();
+                        return (
+                            <TouchableOpacity
+                                onLongPress={() => onDeleteMessage(props.currentMessage)}
+                            >
+                                <View >
+                                    <Text>{fileName}</Text>
+                                    {/* Afficher le nom du document */}
+                                </View>
                             </TouchableOpacity>
                         );
                     }
                     return null;
                 }}
+                
+                
+                
+                
                 renderChatFooter={imagePreview}
-                renderAccessory={image ? ({ onSend }) => <CustomAccessory onSend={onSend} /> : null}
+                // renderChatFooter={renderViewDocument}
+                renderAccessory={image || selectedDocumentName ? ({ onSend }) => <CustomAccessory onSend={onSend} /> : null}
                 renderInputToolbar={props => {
                     return (
                         <InputToolbar {...props}
@@ -366,8 +496,11 @@ export default function Chat({ route }) {
                         />
                     );
                 }}
+                placeholder='Message please...'
+                // showUserAvatar
                 user={{
                     _id: authentication?.currentUser?.uid,
+                    // name: authentication?.currentUser,
                 }}
             />
     );
@@ -450,6 +583,13 @@ const styles = StyleSheet.create({
       },
       sendButtonText:{
         backgroundColor: "yellow",
-      }
+      },
+      documentPreviewContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: "yellow",
+        width: 200,
+        height: 200
+    },
 });
 

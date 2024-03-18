@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ForgotPassword from "./screens/auth/ForgotPassword";
 import AudioCall from "./screens/AudioCall";
 import VideoCall from "./screens/VideoCall";
-import TakeVideo_Photo_Gallery from "./screens/media/TakeVideo_Photo_Gallery";
+import Album from "./screens/media/Album";
 
 
 
@@ -66,7 +66,7 @@ export default function App() {
             headerTitleStyle: { fontWeight: "bold" },
           })}
         />
-        <Stack.Screen name="TakeVideo_Photo_Gallery" component={TakeVideo_Photo_Gallery} />
+        <Stack.Screen name="Album" component={Album} />
         <Stack.Screen name="AudioCall" component={AudioCall} />
         <Stack.Screen name="VideoCall" component={VideoCall} />
         <Stack.Screen name="Profile" component={Profile} />
