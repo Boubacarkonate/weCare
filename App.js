@@ -1,3 +1,5 @@
+
+//app.js
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import Login from "./screens/auth/Login";
@@ -11,9 +13,13 @@ import DeleteProfile from "./screens/profile/DeleteProfile";
 import UpdateProfile from "./screens/profile/UpdateProfile";
 import { Ionicons } from '@expo/vector-icons';
 import ForgotPassword from "./screens/auth/ForgotPassword";
-import AudioCall from "./screens/AudioCall";
-import VideoCall from "./screens/VideoCall";
+import GroupChat from "./screens/GroupChat";
+import GroupChatScreen from "./screens/GroupChatScreen";
+
+// import VideoCall from "./screens/videoCall/VideoCall";
+// import AudioCall from "./screens/AudioCall";
 import Album from "./screens/media/Album";
+
 
 
 
@@ -66,10 +72,36 @@ export default function App() {
             headerTitleStyle: { fontWeight: "bold" },
           })}
         />
-        <Stack.Screen name="Album" component={Album} />
-        <Stack.Screen name="AudioCall" component={AudioCall} />
-        <Stack.Screen name="VideoCall" component={VideoCall} />
+        <Stack.Screen
+          name="GroupChatScreen"
+          component={GroupChatScreen}
+          options={({ route }) => ({
+            headerBackVisible: false,
+            headerTitle: () => (
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {/* <Image
+                  source={{ uri: route.params.avatar }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    marginRight: 10,
+                  }}
+                /> */}
+                <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                  {route.params.name}
+                </Text>
+              </View>
+            ),
+            headerTitleAlign: "left",
+            headerTitleStyle: { fontWeight: "bold" },
+          })}
+        />
+        {/* <Stack.Screen name="AudioCall" component={AudioCall} />
+        <Stack.Screen name="VideoCall" component={VideoCall} /> */}
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="GroupChat" component={GroupChat} />
+       <Stack.Screen name="Album" component={Album} />
         <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
         <Stack.Screen name="DeleteProfile" component={DeleteProfile} />
       </Stack.Navigator>
@@ -82,7 +114,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   headerRightBtn: {
     flexDirection: 'row',
