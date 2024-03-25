@@ -19,6 +19,8 @@ import GroupChatScreen from "./screens/GroupChatScreen";
 // import VideoCall from "./screens/videoCall/VideoCall";
 // import AudioCall from "./screens/AudioCall";
 import Album from "./screens/media/Album";
+// import Calendar from "./screens/Calendar";
+import AgendaScreen from "./screens/Calendar";
 
 
 
@@ -102,6 +104,7 @@ export default function App() {
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="GroupChat" component={GroupChat} />
        <Stack.Screen name="Album" component={Album} />
+       <Stack.Screen name="Calendar" component={AgendaScreen} />
         <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
         <Stack.Screen name="DeleteProfile" component={DeleteProfile} />
       </Stack.Navigator>
